@@ -5,11 +5,31 @@ import streamlit.components.v1 as components
 # Set up a GCS client
 import os
 import subprocess
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "learninpad-dc6bc04e9251.json"
+
+
+def create_gcp_credentials():
+    credentials = service_account.Credentials.from_service_account_info({
+        "type": "service_account",
+        "project_id": os.getenv("project_id"),
+        "private_key_id": os.getenv("private_key_id"),
+        "private_key": os.getenv("private_key").replace('\\n', '\n'),
+        "client_email": os.getenv("client_email"),
+        "client_id": os.getenv("client_id"),
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": os.getenv("client_x509_cert_url"),
+	"universe_domain":"googleapis.com"
+    })
+    return credentials
+# Use the custom credentials when initializing the storage client
+storage_client = storage.Client(credentials=create_gcp_credentials())
+
+#os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "learninpad-dc6bc04e9251.json"
 
 # Function to search for files in a GCS bucket
 def search_gcs_bucket(bucket_name, prefix):
-    bucket = storage_client = storage.Client().bucket(bucket_name)
+    bucket = storage_client.bucket(bucket_name)
     blobs = list(bucket.list_blobs(prefix=prefix))
     return blobs
 
