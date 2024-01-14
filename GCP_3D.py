@@ -5,6 +5,7 @@ import streamlit.components.v1 as components
 # Set up a GCS client
 import os
 import subprocess
+import difflib
 from google.oauth2 import service_account
 
 def create_gcp_credentials():
