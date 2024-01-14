@@ -74,10 +74,10 @@ def main():
                result = subprocess.run(["gsutil", "ls", f"gs://{bucket_name}/{str(i).split(',')[1]}"], capture_output=True, text=True, shell=True)
                download_link = f"[Download {str(i).split(',')[1]}](https://storage.googleapis.com/{bucket_name}/{(str(i).split(',')[1]).strip()})"
                st.markdown(download_link, unsafe_allow_html=True)
-            html_content = read_html_file("model.html")
+            #html_content = read_html_file("model.html")
 
             # Use Streamlit components to render the HTML
-            components.html(html_content, height=600)
+            #components.html(html_content, height=600)
               
         else:
             st.error("Please enter a GCS bucket name to perform the search.")
