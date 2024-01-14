@@ -28,10 +28,21 @@ storage_client = storage.Client(credentials=create_gcp_credentials())
 #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "learninpad-dc6bc04e9251.json"
 
 # Function to search for files in a GCS bucket
-def search_gcs_bucket(bucket_name, prefix):
+def search_gcs_bucket(bucket_name, search_term):
+    storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
-    blobs = list(bucket.list_blobs(prefix=prefix))
-    return blobs
+    blobs = list(bucket.list_blobs())
+
+    # Apply a basic similarity search using file names
+    similar_blobs = []
+    for blob in blobs:
+        # Using sequence matcher to find similarity
+        similarity = difflib.SequenceMatcher(None, blob.name, search_term).ratio()
+        if similarity > 0.5:  # Threshold for similarity
+            #st.write(similarity,blob)
+            similar_blobs.append(blob)
+
+    return similar_blobs
 
 
 def read_html_file(path):
@@ -57,14 +68,15 @@ def main():
 
             # Search for files in GCS
             blobs = search_gcs_bucket(bucket_name, prefix)
-
-            result = subprocess.run(["gsutil", "ls", f"gs://{bucket_name}/{prefix}"], capture_output=True, text=True, shell=True)
-            download_link = f"[Download {prefix}](https://storage.googleapis.com/{bucket_name}/{prefix})"
-            st.markdown(download_link, unsafe_allow_html=True)
-           # html_content = read_html_file("model.html")
+            #st.write(blobs)
+            for i in blobs:
+               result = subprocess.run(["gsutil", "ls", f"gs://{bucket_name}/{str(i).split(',')[1]}"], capture_output=True, text=True, shell=True)
+               download_link = f"[Download {str(i).split(',')[1]}](https://storage.googleapis.com/{bucket_name}/{(str(i).split(',')[1]).strip()})"
+               st.markdown(download_link, unsafe_allow_html=True)
+            html_content = read_html_file("model.html")
 
             # Use Streamlit components to render the HTML
-           # components.html(html_content, height=600)
+            components.html(html_content, height=600)
               
         else:
             st.error("Please enter a GCS bucket name to perform the search.")
